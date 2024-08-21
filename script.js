@@ -4,6 +4,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let worker;
 
+    function initializeWorker() {
+        if (worker) {
+            worker.terminate();
+        }
+        worker = new Worker('worker.js');
+
+        worker.onmessage = function (event) {
+            console.log('Main thread received result:', event.data);
+            resultDiv.innerText = `Result: ${event.data}`;
+        };
+
+        worker.onerror = function (error) {
+            console.error('Worker error:', error.message);
+            resultDiv.innerText = 'Error in worker';
+            worker.terminate();
+            worker = null;
+        };
+    }
+
     function terminateWorker() {
         if (worker) {
             worker.terminate();
@@ -21,17 +40,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         resultDiv.innerText = 'Calculating...';
 
-        terminateWorker();
-
-        worker = new Worker('worker.js');
+        if (!worker) {
+            initializeWorker();
+        }
 
         worker.postMessage({ data: number });
-
-        worker.onmessage = function (event) {
-            console.log('Main thread received result:', event.data);
-            resultDiv.innerText = `Result: ${event.data}`;
-            terminateWorker();
-        };
     }
+
     window.calculate = calculate;
 });
