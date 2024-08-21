@@ -1,3 +1,4 @@
+// worker.js
 function fibonacci(n) {
     if (n <= 1) {
         return n;
@@ -7,7 +8,7 @@ function fibonacci(n) {
 
 self.onmessage = function(event) {
     const inputData = event.data.data;
+    console.log('Worker received data:', inputData); // Логування для перевірки
     const result = fibonacci(inputData);
-
     self.postMessage(result);
 };

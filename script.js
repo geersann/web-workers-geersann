@@ -1,28 +1,37 @@
-const inputNumber = document.getElementById('inputNumber');
-const resultDiv = document.getElementById('result');
+document.addEventListener('DOMContentLoaded', function() {
+    const inputNumber = document.getElementById('inputNumber');
+    const resultDiv = document.getElementById('result');
 
-let worker;
+    let worker;
 
-function terminateWorker() {
-    if (worker) {
-        worker.terminate();
-        worker = null;
+    function terminateWorker() {
+        if (worker) {
+            worker.terminate();
+            worker = null;
+        }
     }
-}
 
-function calculate() {
-    const number = parseInt(inputNumber.value);
+    function calculate() {
+        const number = parseInt(inputNumber.value);
 
-    resultDiv.innerText = 'Calculating...';
+        if (isNaN(number)) {
+            resultDiv.innerText = 'Invalid input';
+            return;
+        }
 
-    terminateWorker();
+        resultDiv.innerText = 'Calculating...';
 
-    worker = new Worker('worker.js');
-
-    worker.postMessage({ data: number });
-
-    worker.onmessage = function (event) {
-        resultDiv.innerText = `Result: ${event.data}`;
         terminateWorker();
-    };
-}
+
+        worker = new Worker('worker.js');
+
+        worker.postMessage({ data: number });
+
+        worker.onmessage = function (event) {
+            console.log('Main thread received result:', event.data);
+            resultDiv.innerText = `Result: ${event.data}`;
+            terminateWorker();
+        };
+    }
+    window.calculate = calculate;
+});
